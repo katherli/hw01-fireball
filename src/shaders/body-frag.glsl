@@ -60,7 +60,7 @@ float bias(float t, float b) {
 void main() {
     vec4 glowColor = vec4(u_Color.x, u_Color.y + 0.6, u_Color.z, 1.0);
     vec4 center = vec4(0.0, 0.0, 0.0, 1.0);
-    float intensity = 3.5; 
+    float intensity = 6.5; 
 
     // Distance of the fragment from the center of the sphere
     float distanceFromCenter = length(fs_Pos.xyz - center.xyz);
