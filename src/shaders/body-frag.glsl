@@ -9,6 +9,7 @@
 // data passed into the fragment shader by the vertex shader, the fragment shader
 // can compute what color to apply to its pixel based on things like vertex
 // position, light position, and vertex color.
+
 precision highp float;
 
 uniform vec4 u_Color;
