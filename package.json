@@ -1,7 +1,8 @@
 {
   "scripts": {
     "start": "export NODE_OPTIONS=--openssl-legacy-provider && webpack-dev-server --no-hot --live-reload",
-    "build": "export NODE_OPTIONS=--openssl-legacy-provider && webpack"
+    "build": "export NODE_OPTIONS=--openssl-legacy-provider && webpack",
+    "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
     "@types/dat.gui": "^0.7.7",
