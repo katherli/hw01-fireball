@@ -31,6 +31,8 @@ class ShaderProgram {
   unifColor: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
   unifCamPos: WebGLUniformLocation;
+  unifIntensity: WebGLUniformLocation;
+  unifTimeOffset: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -52,6 +54,8 @@ class ShaderProgram {
     this.unifColor      = gl.getUniformLocation(this.prog, "u_Color");
     this.unifTime      = gl.getUniformLocation(this.prog, "u_Time");
     this.unifCamPos  = gl.getUniformLocation(this.prog, "u_CamPos"); 
+    this.unifIntensity  = gl.getUniformLocation(this.prog, "u_Intensity"); 
+    this.unifTimeOffset = gl.getUniformLocation(this.prog, "u_TimeOffset");
   }
 
   use() {
@@ -101,6 +105,20 @@ class ShaderProgram {
     this.use();
     if (this.unifCamPos != -1) {
       gl.uniform4fv(this.unifCamPos, vec4.fromValues(camera[0], camera[1], camera[2], 1));
+    }
+  }
+
+  setIntensity(intensity: number) {
+    this.use();
+    if (this.unifIntensity !== -1) {
+      gl.uniform1f(this.unifIntensity, intensity);
+    }
+  }
+
+  setTimeOffset(timeOffset: number) {
+    this.use();
+    if (this.unifIntensity !== -1) {
+      gl.uniform1f(this.unifTimeOffset, timeOffset);
     }
   }
 

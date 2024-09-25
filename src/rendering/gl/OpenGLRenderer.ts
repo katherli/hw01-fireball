@@ -22,7 +22,7 @@ class OpenGLRenderer {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }
 
-  render(camera: Camera, prog: ShaderProgram, color: vec4, time: number, drawables: Array<Drawable>) {
+  render(camera: Camera, prog: ShaderProgram, color: vec4, time: number, drawables: Array<Drawable>, intensity: number, timeOffset: number) {
     let model = mat4.create();
     let viewProj = mat4.create();
     //let color = vec4.fromValues(1, 0, 0, 1);
@@ -35,6 +35,8 @@ class OpenGLRenderer {
     prog.setTime(time);
 
     prog.setCameraPosition(camera.controls.eye);
+    prog.setIntensity(intensity);
+    prog.setTimeOffset(timeOffset);
 
     for (let drawable of drawables) {
       prog.draw(drawable);

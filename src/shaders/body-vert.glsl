@@ -6,6 +6,8 @@ uniform float u_Time;
 uniform mat4 u_ModelInvTr;  // The inverse transpose of the model matrix.
                             // This allows us to transform the object's normals properly
                             // if the object has been non-uniformly scaled.
+uniform float u_Intensity;
+uniform float u_TimeOffset;
 
 in vec4 vs_Pos;
 in vec4 vs_Nor;
@@ -15,26 +17,9 @@ out vec4 fs_Nor;
 out vec4 fs_LightVec;
 out vec4 fs_Pos; 
 out vec4 fs_Col;
+out float fs_YOffset;
 
 const vec4 lightPos = vec4(5, 5, 3, 1);
-
-
-#define BTW_EYES_DIST 0.3
-#define EYE_SIZE 0.115
-
-// Eye position in local space
-vec4 leftEyeCenter = vec4(-BTW_EYES_DIST, 0.1, 1.0, 1.0);
-vec4 rightEyeCenter = vec4(BTW_EYES_DIST, 0.1, 1.0, 1.0);
-
-float distanceFromEye(vec4 position, vec4 eyeCenter) {
-    return length(position.xyz - eyeCenter.xyz);
-}
-
-bool isInEyeRegion(vec4 position) {
-    float leftEyeDist = distanceFromEye(position, leftEyeCenter);
-    float rightEyeDist = distanceFromEye(position, rightEyeCenter);
-    return (leftEyeDist < EYE_SIZE) || (rightEyeDist < EYE_SIZE);
-}
 
 //noise functions are from cis 460 lecture slides, toolbox functions are from 566 slides
 
@@ -107,13 +92,12 @@ float worleyNoise(vec3 uv) {
 }
 
 vec4 flameY(vec4 modelposition) {
-    float flameT = u_Time * 0.05;
-    float intensity = 1.2; // Controls the overall intensity of the effect
+    float flameT = u_Time * (0.07 * u_TimeOffset);
 
     //float perlinValue = 0.0;  //for testing
-    float perlinValue = perlinNoise3D(modelposition.xyz + u_Time * 0.07);
+    float perlinValue = perlinNoise3D(modelposition.xyz + flameT);
     
-    float worleyValue = intensity * worleyNoise(modelposition.xyz + u_Time * 0.07);
+    float worleyValue = u_Intensity * worleyNoise(modelposition.xyz + flameT);
     //float worleyValue = 0.0;  //for testing
 
     worleyValue = pow(worleyValue, 1.7);
@@ -170,7 +154,8 @@ float fbm(float x, float y, float frequency, float amplitude, int octaves) {
 
 // fbm to make it look like heat radiating across the surface
 vec4 fbmSurface(vec4 position, vec4 normal) {
-    float fbmValue = fbm(position.x + u_Time * 0.03, position.z + u_Time * 0.03, 8.0, 0.02, 8);
+    float surfaceT = u_Time * (0.03 * u_TimeOffset);
+    float fbmValue = fbm(position.x + surfaceT, position.z + surfaceT, 8.0, 0.02, 8);
 
     position.xyz += normal.xyz * fbmValue * 1.6;
     
@@ -180,9 +165,7 @@ vec4 fbmSurface(vec4 position, vec4 normal) {
 vec4 bodyShape(vec4 position) {
 
     // Top flame part
-    if (!isInEyeRegion(vs_Pos)) {
-        position = flame(position);
-    }
+    position = flame(position);
     
     // Dome shape body
     float squashFactor = 1.0;
@@ -219,10 +202,12 @@ vec4 bodyShape(vec4 position) {
         position.y -= displacementFactor * armThickness * 2.0;
         position.z += displacementFactor;
     } else {
-        position.x += (0.05f * sin(7.0 * (0.2 * -u_Time + position.y))); // Negative time so sine waves travel up
+        float sinT = u_Time * (0.2 * u_TimeOffset);
+        position.x += (0.05f * sin((8.0 - u_Intensity) * (-sinT + position.y))); // Negative time so sine waves travel up
     }
-    position.x *= 1.1;
+    position.x *= 1.1 * (0.8 + u_Intensity * 0.2);
     position.y *= 0.9;
+    position.z *= 0.8 + u_Intensity * 0.2;
     
     return position;
 }
@@ -240,13 +225,13 @@ void main() {
     vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
     
     // Deform main body
-    if (!isInEyeRegion(vs_Pos)) {
-        modelposition = bodyShape(modelposition);
-    }
+    modelposition = bodyShape(modelposition);
     
     modelposition = fbmSurface(modelposition, fs_Nor);
 
-    modelposition.y += sin(u_Time * 0.09) * 0.1;
+    float offsetT = u_Time * (0.09 * u_TimeOffset);
+    fs_YOffset = sin(u_Time * 0.09) * 0.1;
+    modelposition.y += sin(0.09 * u_Time) * 0.1;
 
     // Apply to model matrix to transform the vertex
     vec4 worldPos = u_Model * modelposition;
