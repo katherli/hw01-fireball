@@ -25,6 +25,7 @@ Interactive variables using dat.GUI:
 - Color (ranges from red to blue to reflect how Calcifer's color changes)
 - Intensity (changes size of the flames)
 - Speed (changes speed of the flames)
+- Reset Scene button to reset the above values
 
 ## Extra Spice
 
